@@ -1,0 +1,9 @@
+1	Wemos d1 R2
+1	Lcd 16x2
+1	Rc522
+1	Alimentatore 12V 2.4A
+1	Tag nfc 
+1	Millefori 
+1	Cassetta di derivazione 
+1	Cavo di alimentazione 
+1	IR Sensor
