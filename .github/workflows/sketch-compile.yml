@@ -33,4 +33,3 @@ jobs:
           libraries: |
             - name: time
             - name: MFRC522
-            - name: LiquidCrystal_I2C
