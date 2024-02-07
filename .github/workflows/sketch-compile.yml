@@ -10,13 +10,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Install curl
+        run: apt-get update & apt-get install curl -y
       - name: Install Arduino CLI
-        run: |
-          mkdir -p $HOME/bin
-          apt-get update
-          apt-get install curl -y
-          curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
-
+        run: curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh sh
       - name: Install Wemos D1 R2 board package
         run: arduino-cli core install esp8266:esp8266
 
