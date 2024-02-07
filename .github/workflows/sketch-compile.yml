@@ -33,8 +33,4 @@ jobs:
           libraries: |
             - name: time
             - name: MFRC522
-            - name: ESP8266WiFi
-            - name: ESP8266WebServer
-            - name: WiFiClient
-            - name: WiFiClientSecure
             - name: LiquidCrystal_I2C
