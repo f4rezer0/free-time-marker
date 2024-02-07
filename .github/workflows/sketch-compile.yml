@@ -32,7 +32,6 @@ jobs:
 
           libraries: |
             - name: time
-            - name: Wire
             - name: MFRC522
             - name: ESP8266WiFi
             - name: ESP8266WebServer
