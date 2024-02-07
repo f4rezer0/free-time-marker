@@ -34,7 +34,7 @@ jobs:
 
           platforms: |
             - name: "arduino:samd"
-            - name: "arduino:megavr"
+            - name: "arduino:megaavr"
             - name: "arduino:mbed"
             - name: "arduino:mbed_nano"
             - name: "arduino:renesas_uno"
