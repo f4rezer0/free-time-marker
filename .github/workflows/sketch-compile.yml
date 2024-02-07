@@ -1,0 +1,25 @@
+name: Sketch Compile
+
+# the action is triggered at every pull request
+on:
+  - pull_request
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install Arduino CLI
+        run: |
+          mkdir -p $HOME/bin
+          curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR=$HOME/bin sh
+
+      - name: Install Wemos D1 R2 board package
+        run: arduino-cli core install esp8266:esp8266
+
+      - name: Install required libraries
+        run: arduino-cli lib install time MFRC522 ESP8266WiFi WiFiClientSecure
+
+      - name: Compile Arduino sketch
+        run: arduino-cli compile --fqbn esp8266:esp8266:d1_mini WeMosD1-RC522.ino
