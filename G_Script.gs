@@ -22,7 +22,7 @@ function sendSheetPreviousMonth() {
   var NameMonthYear = Utilities.formatDate(PreviousMonth, "GMT+1", "MMMM-yyyy");
   var SheetPreviousMonth = ss.getSheetByName(NameMonthYear);
 
-  if (SheetPrevoiusMonth) {
+  if (SheetPreviousMonth) {
     // Set the recipient and the message body
     var recipient = 'address@email.com';  // Replace with your desired email address
     var object = 'Foglio del Mese Precedente';  // Replace with your desired email object
