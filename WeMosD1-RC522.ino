@@ -22,9 +22,11 @@
 #define STASSID "YOUR-SSID"
 #define STAPSK "YOUR-PASSWORD"
 #endif
-#define RST_PIN D3 // Configurable, see typical pin layout above
-#define SS_PIN D8 // Configurable, see typical pin layout above
-#define IRSensorPin D4 //Define Digital Input PIN
+// Configurable, see typical pin layout above
+#define RST_PIN D3
+#define SS_PIN D8
+// Define Digital Input PIN
+#define IRSensorPin D4 
 // Connection attempts
 int attempts = 0;
 // int "line" to clear only a line of the LCD
