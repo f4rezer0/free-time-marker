@@ -10,7 +10,7 @@ jobs:
     strategy:
       matrix:
         fqbn:
-          - "esp8266:esp822:d1_mini"
+          - "esp8266:esp8266:d1_mini"
 
     steps:
       # This step makes the contents of the repository available to the workflow
