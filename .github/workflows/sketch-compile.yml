@@ -8,10 +8,6 @@ on:
 jobs:
   sketch-compile:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        fqbn:
-          - "esp8266:esp8266:d1_mini"
 
     steps:
       # This step makes the contents of the repository available to the workflow
@@ -22,6 +18,8 @@ jobs:
       - name: Compile sketch
         uses: arduino/compile-sketches@v1
         with:
+          fqbn: "esp8266:esp8266:d1_mini"
+
           # The default is to compile for the Arduino Uno board. If you want to compile for other boards, use the `fqbn` input.
           sketch-paths: |
             # search the sketches in the current repo (no subfolders)
