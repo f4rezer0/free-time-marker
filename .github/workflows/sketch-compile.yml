@@ -3,6 +3,7 @@ name: Sketch Compile
 # the action is triggered at every pull request
 on:
   - pull_request
+  - push
 
 jobs:
   sketch-compile:
