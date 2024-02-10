@@ -7,7 +7,7 @@ on:
 
 jobs:
   sketch-compile:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
       # This step makes the contents of the repository available to the workflow
