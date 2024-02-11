@@ -60,7 +60,7 @@ IPAddress dns(8, 8, 8, 8);
 LiquidCrystal_I2C lcd(0x27,16,2);
 
 // GoogleScriptDeploymentID
-String GAS_ID = "YOUR-GOOGLE-SCRIPT-DEPLOYMENT-ID";
+String GScriptId = "YOUR-GOOGLE-SCRIPT-DEPLOYMENT-ID";
 
 // Host & httpsPort
 const char* host = "script.google.com";
