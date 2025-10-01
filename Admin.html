@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Free Time Marker</title>
+  <?!= include('Stylesheet'); ?>
+</head>
+<body class="dashboard">
+  <nav class="navbar">
+    <h1>🕒 Free Time Marker - Pannello Admin</h1>
+    <div class="navbar-user">
+      <span id="userInfo"></span>
+      <button class="btn-logout" onclick="logout()">Esci</button>
+    </div>
+  </nav>
+
+  <div class="container">
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3>Timbrature Oggi</h3>
+        <div class="stat-value" id="statOggi">-</div>
+      </div>
+      <div class="stat-card">
+        <h3>Timbrature Mese</h3>
+        <div class="stat-value" id="statMese">-</div>
+      </div>
+      <div class="stat-card">
+        <h3>Dipendenti Attivi</h3>
+        <div class="stat-value" id="statDipendenti">-</div>
+      </div>
+      <div class="stat-card">
+        <h3>Totale Timbrature</h3>
+        <div class="stat-value" id="statTotale">-</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('dipendenti')">👥 Dipendenti</button>
+      <button class="tab" onclick="showTab('presenze')">📋 Presenze</button>
+      <button class="tab" onclick="showTab('turni')">🕐 Turni</button>
+      <button class="tab" onclick="showTab('export')">📊 Export</button>
+    </div>
+
+    <!-- TAB: Dipendenti -->
+    <div id="tab-dipendenti" class="tab-content active">
+      <div class="card">
+        <div class="card-header">
+          <h2>Gestione Dipendenti</h2>
+          <div style="display: flex; gap: 10px;">
+            <input type="text" class="search-box" id="searchDipendenti" placeholder="🔍 Cerca dipendente..." oninput="filterDipendenti()">
+            <button class="btn-success" onclick="openAddDipendenteModal()">+ Nuovo Dipendente</button>
+          </div>
+        </div>
+
+        <div id="dipendentiTable">
+          <div class="loading">Caricamento...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Presenze -->
+    <div id="tab-presenze" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <h2>Registro Presenze</h2>
+        </div>
+
+        <div class="filter-group">
+          <select id="filterAnno" onchange="loadPresenze()">
+            <option value="">Tutti gli anni</option>
+          </select>
+          <select id="filterMese" onchange="loadPresenze()">
+            <option value="">Tutti i mesi</option>
+            <option value="1">Gennaio</option>
+            <option value="2">Febbraio</option>
+            <option value="3">Marzo</option>
+            <option value="4">Aprile</option>
+            <option value="5">Maggio</option>
+            <option value="6">Giugno</option>
+            <option value="7">Luglio</option>
+            <option value="8">Agosto</option>
+            <option value="9">Settembre</option>
+            <option value="10">Ottobre</option>
+            <option value="11">Novembre</option>
+            <option value="12">Dicembre</option>
+          </select>
+          <select id="filterDipendente" onchange="loadPresenze()">
+            <option value="">Tutti i dipendenti</option>
+          </select>
+        </div>
+
+        <div id="presenzeTable">
+          <div class="loading">Caricamento...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Turni -->
+    <div id="tab-turni" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <h2>Gestione Turni</h2>
+          <button class="btn-success" onclick="openAddTurnoModal()">+ Nuovo Turno</button>
+        </div>
+
+        <div id="turniTable">
+          <div class="loading">Caricamento...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Export -->
+    <div id="tab-export" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <h2>Export Dati</h2>
+        </div>
+
+        <p style="margin-bottom: 20px;">Esporta i dati direttamente dal Google Spreadsheet.</p>
+
+        <div style="display: flex; flex-direction: column; gap: 15px; max-width: 400px;">
+          <button class="btn-primary" onclick="openSpreadsheet()">📊 Apri Spreadsheet</button>
+          <button class="btn-secondary" onclick="downloadCSV()">📄 Download CSV (mese corrente)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Add/Edit Dipendente -->
+  <div id="modalDipendente" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalDipendenteTitle">Nuovo Dipendente</h3>
+        <button class="close-btn" onclick="closeModal('modalDipendente')">&times;</button>
+      </div>
+
+      <form id="formDipendente" onsubmit="saveDipendente(event)">
+        <div class="form-group">
+          <label for="nfcTag">Tag NFC *</label>
+          <input type="text" id="nfcTag" required placeholder="es: 43339307000">
+        </div>
+
+        <div class="form-group">
+          <label for="nome">Nome *</label>
+          <input type="text" id="nome" required>
+        </div>
+
+        <div class="form-group">
+          <label for="cognome">Cognome *</label>
+          <input type="text" id="cognome" required>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email">
+        </div>
+
+        <div class="form-group">
+          <label for="reparto">Reparto</label>
+          <input type="text" id="reparto">
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+          <button type="submit" class="btn btn-primary">Salva</button>
+          <button type="button" class="btn-secondary" onclick="closeModal('modalDipendente')">Annulla</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Add/Edit Turno -->
+  <div id="modalTurno" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTurnoTitle">Nuovo Turno</h3>
+        <button class="close-btn" onclick="closeModal('modalTurno')">&times;</button>
+      </div>
+
+      <form id="formTurno" onsubmit="saveTurno(event)">
+        <input type="hidden" id="turnoId">
+
+        <div class="form-group">
+          <label for="turnoDipendente">Dipendente *</label>
+          <select id="turnoDipendente" required>
+            <option value="">Seleziona dipendente</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="giornoSettimana">Giorno Settimana *</label>
+          <select id="giornoSettimana" required>
+            <option value="0">Domenica</option>
+            <option value="1">Lunedì</option>
+            <option value="2">Martedì</option>
+            <option value="3">Mercoledì</option>
+            <option value="4">Giovedì</option>
+            <option value="5">Venerdì</option>
+            <option value="6">Sabato</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="oraInizio">Ora Inizio *</label>
+          <input type="time" id="oraInizio" required>
+        </div>
+
+        <div class="form-group">
+          <label for="oraFine">Ora Fine *</label>
+          <input type="time" id="oraFine" required>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+          <button type="submit" class="btn btn-primary">Salva</button>
+          <button type="button" class="btn-secondary" onclick="closeModal('modalTurno')">Annulla</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let currentUser = null;
+    let allDipendenti = [];
+    let allPresenze = [];
+    let allTurni = [];
+    let editingDipendente = null;
+
+    // Init
+    window.onload = function() {
+      const userStr = sessionStorage.getItem('user');
+      if (!userStr) {
+        window.location.href = '<?= ScriptApp.getService().getUrl() ?>';
+        return;
+      }
+
+      currentUser = JSON.parse(userStr);
+
+      if (currentUser.ruolo !== 'admin') {
+        window.location.href = '<?= ScriptApp.getService().getUrl() ?>?page=viewer';
+        return;
+      }
+
+      document.getElementById('userInfo').textContent = '👤 ' + currentUser.username;
+
+      loadStats();
+      loadDipendenti();
+      loadPresenze();
+      loadTurni();
+      populateYearFilter();
+    };
+
+    function logout() {
+      sessionStorage.removeItem('user');
+      window.location.href = '<?= ScriptApp.getService().getUrl() ?>';
+    }
+
+    function showTab(tabName) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+
+      event.target.classList.add('active');
+      document.getElementById('tab-' + tabName).classList.add('active');
+    }
+
+    function openModal(modalId) {
+      document.getElementById(modalId).classList.add('show');
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('show');
+    }
+
+    // ===== STATS =====
+    function loadStats() {
+      google.script.run
+        .withSuccessHandler(function(response) {
+          if (response.success) {
+            const stats = response.stats;
+            document.getElementById('statOggi').textContent = stats.timbratureOggi;
+            document.getElementById('statMese').textContent = stats.timbratureMese;
+            document.getElementById('statDipendenti').textContent = stats.dipendentiAttivi;
+            document.getElementById('statTotale').textContent = stats.totaleTimbrature;
+          }
+        })
+        .withFailureHandler(function(error) {
+          console.error('Errore caricamento stats:', error);
+        })
+        .doPost({action: 'getStatistiche', ruolo: currentUser.ruolo});
+    }
+
+    // ===== DIPENDENTI =====
+    function loadDipendenti() {
+      google.script.run
+        .withSuccessHandler(function(response) {
+          if (response.success) {
+            allDipendenti = response.dipendenti;
+            renderDipendenti();
+            populateDipendentiFilter();
+            populateTurnoDipendenti();
+          }
+        })
+        .withFailureHandler(function(error) {
+          document.getElementById('dipendentiTable').innerHTML = '<p class="error-msg">Errore caricamento: ' + error.message + '</p>';
+        })
+        .doPost({action: 'getDipendenti', ruolo: currentUser.ruolo});
+    }
+
+    function renderDipendenti() {
+      const searchTerm = document.getElementById('searchDipendenti').value.toLowerCase();
+      const filtered = allDipendenti.filter(d =>
+        d.nome.toLowerCase().includes(searchTerm) ||
+        d.cognome.toLowerCase().includes(searchTerm) ||
+        d.nfcTag.toLowerCase().includes(searchTerm) ||
+        (d.reparto && d.reparto.toLowerCase().includes(searchTerm))
+      );
+
+      let html = '<table><thead><tr><th>Tag NFC</th><th>Nome</th><th>Cognome</th><th>Email</th><th>Reparto</th><th>Stato</th><th>Azioni</th></tr></thead><tbody>';
+
+      if (filtered.length === 0) {
+        html += '<tr><td colspan="7" style="text-align: center; padding: 40px; color: #999;">Nessun dipendente trovato</td></tr>';
+      } else {
+        filtered.forEach(d => {
+          const statusBadge = d.attivo ? '<span class="badge badge-success">Attivo</span>' : '<span class="badge badge-danger">Inattivo</span>';
+          html += `<tr>
+            <td>${d.nfcTag}</td>
+            <td>${d.nome}</td>
+            <td>${d.cognome}</td>
+            <td>${d.email || '-'}</td>
+            <td>${d.reparto || '-'}</td>
+            <td>${statusBadge}</td>
+            <td class="action-buttons">
+              <button class="btn-icon" onclick='editDipendente(${JSON.stringify(d)})'>✏️</button>
+              <button class="btn-icon" onclick="deleteDipendente('${d.nfcTag}')">🗑️</button>
+            </td>
+          </tr>`;
+        });
+      }
+
+      html += '</tbody></table>';
+      document.getElementById('dipendentiTable').innerHTML = html;
+    }
+
+    function filterDipendenti() {
+      renderDipendenti();
+    }
+
+    function openAddDipendenteModal() {
+      editingDipendente = null;
+      document.getElementById('modalDipendenteTitle').textContent = 'Nuovo Dipendente';
+      document.getElementById('formDipendente').reset();
+      document.getElementById('nfcTag').disabled = false;
+      openModal('modalDipendente');
+    }
+
+    function editDipendente(dipendente) {
+      editingDipendente = dipendente;
+      document.getElementById('modalDipendenteTitle').textContent = 'Modifica Dipendente';
+      document.getElementById('nfcTag').value = dipendente.nfcTag;
+      document.getElementById('nfcTag').disabled = true;
+      document.getElementById('nome').value = dipendente.nome;
+      document.getElementById('cognome').value = dipendente.cognome;
+      document.getElementById('email').value = dipendente.email || '';
+      document.getElementById('reparto').value = dipendente.reparto || '';
+      openModal('modalDipendente');
+    }
+
+    function saveDipendente(event) {
+      event.preventDefault();
+
+      const dipendente = {
+        nfcTag: document.getElementById('nfcTag').value,
+        nome: document.getElementById('nome').value,
+        cognome: document.getElementById('cognome').value,
+        email: document.getElementById('email').value,
+        reparto: document.getElementById('reparto').value,
+        attivo: editingDipendente ? editingDipendente.attivo : true
+      };
+
+      const action = editingDipendente ? 'updateDipendente' : 'addDipendente';
+
+      google.script.run
+        .withSuccessHandler(function(response) {
+          if (response.success) {
+            closeModal('modalDipendente');
+            loadDipendenti();
+            loadStats();
+            alert(response.message);
+          } else {
+            alert(response.message);
+          }
+        })
+        .withFailureHandler(function(error) {
+          alert('Errore: ' + error.message);
+        })
+        .doPost({action: action, dipendente: dipendente, ruolo: currentUser.ruolo});
+    }
+
+    function deleteDipendente(nfcTag) {
+      if (!confirm('Sei sicuro di voler disattivare questo dipendente?')) return;
+
+      google.script.run
+        .withSuccessHandler(function(response) {
+          if (response.success) {
+            loadDipendenti();
+            loadStats();
+            alert(response.message);
+          } else {
+            alert(response.message);
+          }
+        })
+        .withFailureHandler(function(error) {
+          alert('Errore: ' + error.message);
+        })
+        .doPost({action: 'deleteDipendente', nfcTag: nfcTag, ruolo: currentUser.ruolo});
+    }
+
+    // ===== PRESENZE =====
+    function loadPresenze() {
+      const anno = document.getElementById('filterAnno').value;
+      const mese = document.getElementById('filterMese').value;
+      const nfcTag = document.getElementById('filterDipendente').value;
+
+      google.script.run
+        .withSuccessHandler(function(response) {
+          if (response.success) {
+            allPresenze = response.timbrature;
+            renderPresenze();
+          }
+        })
+        .withFailureHandler(function(error) {
+          document.getElementById('presenzeTable').innerHTML = '<p class="error-msg">Errore caricamento: ' + error.message + '</p>';
+        })
+        .doPost({action: 'getTimbrature', anno: anno, mese: mese, nfcTag: nfcTag, ruolo: currentUser.ruolo});
+    }
+
+    function renderPresenze() {
+      let html = '<table><thead><tr><th>Data e Ora</th><th>Tag NFC</th><th>Nome</th><th>Cognome</th></tr></thead><tbody>';
+
+      if (allPresenze.length === 0) {
+        html += '<tr><td colspan="4" style="text-align: center; padding: 40px; color: #999;">Nessuna presenza registrata</td></tr>';
+      } else {
+        allPresenze.slice().reverse().forEach(p => {
+          const timestamp = new Date(p.timestamp);
+          html += `<tr>
+            <td>${timestamp.toLocaleString('it-IT')}</td>
+            <td>${p.nfcTag}</td>
+            <td>${p.nome}</td>
+            <td>${p.cognome}</td>
+          </tr>`;
+        });
+      }
+
+      html += '</tbody></table>';
+      document.getElementById('presenzeTable').innerHTML = html;
+    }
+
+    function populateYearFilter() {
+      const select = document.getElementById('filterAnno');
+      const currentYear = new Date().getFullYear();
+      for (let y = currentYear; y >= currentYear - 5; y--) {
+        const option = document.createElement('option');
+        option.value = y;
+        option.textContent = y;
+        select.appendChild(option);
+      }
+    }
+
+    function populateDipendentiFilter() {
+      const select = document.getElementById('filterDipendente');
+      select.innerHTML = '<option value="">Tutti i dipendenti</option>';
+      allDipendenti.forEach(d => {
+        const option = document.createElement('option');
+        option.value = d.nfcTag;
+        option.textContent = d.nome + ' ' + d.cognome;
+        select.appendChild(option);
+      });
+    }
+
+    // ===== TURNI =====
+    function loadTurni() {
+      google.script.run
+        .withSuccessHandler(function(response) {
+          if (response.success) {
+            allTurni = response.turni;
+            renderTurni();
+          }
+        })
+        .withFailureHandler(function(error) {
+          document.getElementById('turniTable').innerHTML = '<p class="error-msg">Errore caricamento: ' + error.message + '</p>';
+        })
+        .doPost({action: 'getTurni', ruolo: currentUser.ruolo});
+    }
+
+    function renderTurni() {
+      const giorni = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
+
+      let html = '<table><thead><tr><th>Dipendente</th><th>Giorno</th><th>Orario</th><th>Azioni</th></tr></thead><tbody>';
+
+      if (allTurni.length === 0) {
+        html += '<tr><td colspan="4" style="text-align: center; padding: 40px; color: #999;">Nessun turno configurato</td></tr>';
+      } else {
+        allTurni.forEach(t => {
+          html += `<tr>
+            <td>${t.nome} ${t.cognome}</td>
+            <td>${giorni[t.giornoSettimana]}</td>
+            <td>${t.oraInizio} - ${t.oraFine}</td>
+            <td class="action-buttons">
+              <button class="btn-icon" onclick='editTurno(${JSON.stringify(t)})'>✏️</button>
+              <button class="btn-icon" onclick="deleteTurno(${t.id})">🗑️</button>
+            </td>
+          </tr>`;
+        });
+      }
+
+      html += '</tbody></table>';
+      document.getElementById('turniTable').innerHTML = html;
+    }
+
+    function populateTurnoDipendenti() {
+      const select = document.getElementById('turnoDipendente');
+      select.innerHTML = '<option value="">Seleziona dipendente</option>';
+      allDipendenti.filter(d => d.attivo).forEach(d => {
+        const option = document.createElement('option');
+        option.value = d.nfcTag;
+        option.textContent = d.nome + ' ' + d.cognome;
+        option.dataset.nome = d.nome;
+        option.dataset.cognome = d.cognome;
+        select.appendChild(option);
+      });
+    }
+
+    function openAddTurnoModal() {
+      document.getElementById('modalTurnoTitle').textContent = 'Nuovo Turno';
+      document.getElementById('formTurno').reset();
+      document.getElementById('turnoId').value = '';
+      openModal('modalTurno');
+    }
+
+    function editTurno(turno) {
+      document.getElementById('modalTurnoTitle').textContent = 'Modifica Turno';
+      document.getElementById('turnoId').value = turno.id;
+      document.getElementById('turnoDipendente').value = turno.nfcTag;
+      document.getElementById('giornoSettimana').value = turno.giornoSettimana;
+      document.getElementById('oraInizio').value = turno.oraInizio;
+      document.getElementById('oraFine').value = turno.oraFine;
+      openModal('modalTurno');
+    }
+
+    function saveTurno(event) {
+      event.preventDefault();
+
+      const select = document.getElementById('turnoDipendente');
+      const selectedOption = select.options[select.selectedIndex];
+
+      const turno = {
+        id: document.getElementById('turnoId').value || null,
+        nfcTag: document.getElementById('turnoDipendente').value,
+        nome: selectedOption.dataset.nome,
+        cognome: selectedOption.dataset.cognome,
+        giornoSettimana: parseInt(document.getElementById('giornoSettimana').value),
+        oraInizio: document.getElementById('oraInizio').value,
+        oraFine: document.getElementById('oraFine').value
+      };
+
+      google.script.run
+        .withSuccessHandler(function(response) {
+          if (response.success) {
+            closeModal('modalTurno');
+            loadTurni();
+            alert(response.message);
+          } else {
+            alert(response.message);
+          }
+        })
+        .withFailureHandler(function(error) {
+          alert('Errore: ' + error.message);
+        })
+        .doPost({action: 'saveTurno', turno: turno, ruolo: currentUser.ruolo});
+    }
+
+    function deleteTurno(id) {
+      if (!confirm('Sei sicuro di voler eliminare questo turno?')) return;
+
+      google.script.run
+        .withSuccessHandler(function(response) {
+          if (response.success) {
+            loadTurni();
+            alert(response.message);
+          } else {
+            alert(response.message);
+          }
+        })
+        .withFailureHandler(function(error) {
+          alert('Errore: ' + error.message);
+        })
+        .doPost({action: 'deleteTurno', id: id, ruolo: currentUser.ruolo});
+    }
+
+    // ===== EXPORT =====
+    function openSpreadsheet() {
+      window.open('https://docs.google.com/spreadsheets/d/____YOUR____ID___SPREADSHEET', '_blank');
+    }
+
+    function downloadCSV() {
+      alert('Apri il foglio mensile e usa File > Download > CSV');
+      openSpreadsheet();
+    }
+  </script>
+</body>
+</html>

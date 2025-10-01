@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Free Time Marker - Login</title>
+  <?!= include('Stylesheet'); ?>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <h1>🕒 Free Time Marker</h1>
+        <p>Sistema di Gestione Presenze</p>
+      </div>
+
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" required autofocus>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="loginBtn">
+          Accedi
+        </button>
+
+        <div id="errorMsg" class="error-msg" style="display: none;"></div>
+      </form>
+
+      <div class="login-footer">
+        <small>v2.0 | Free Time Marker System</small>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function handleLogin(event) {
+      event.preventDefault();
+
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const loginBtn = document.getElementById('loginBtn');
+      const errorMsg = document.getElementById('errorMsg');
+
+      // Disable button
+      loginBtn.disabled = true;
+      loginBtn.textContent = 'Accesso in corso...';
+      errorMsg.style.display = 'none';
+
+      // Call Google Apps Script
+      google.script.run
+        .withSuccessHandler(function(response) {
+          if (response.success) {
+            // Save user session
+            sessionStorage.setItem('user', JSON.stringify(response.user));
+
+            // Redirect based on role
+            if (response.user.ruolo === 'admin') {
+              window.location.href = '<?= ScriptApp.getService().getUrl() ?>?page=admin';
+            } else {
+              window.location.href = '<?= ScriptApp.getService().getUrl() ?>?page=viewer';
+            }
+          } else {
+            errorMsg.textContent = response.message || 'Credenziali non valide';
+            errorMsg.style.display = 'block';
+            loginBtn.disabled = false;
+            loginBtn.textContent = 'Accedi';
+          }
+        })
+        .withFailureHandler(function(error) {
+          errorMsg.textContent = 'Errore di connessione: ' + error.message;
+          errorMsg.style.display = 'block';
+          loginBtn.disabled = false;
+          loginBtn.textContent = 'Accedi';
+        })
+        .handleLogin({
+          action: 'login',
+          username: username,
+          password: password
+        });
+    }
+  </script>
+</body>
+</html>
